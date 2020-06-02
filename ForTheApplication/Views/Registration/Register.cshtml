@@ -1,0 +1,165 @@
+﻿@model ForTheApplication.Models.ViewModels.UserRegistrationModel
+
+<div class="row">
+    <div class="col-md-4"></div>
+    <div class="col-md-4 bg-transparent">
+        <form method="post" id="registrationForm" action="javascript:void(0);" >
+            <h4 class="font-weight-light">Create a new account.</h4>
+            <hr />
+            <div asp-validation-summary="All" class="text-danger" id="divSummary"></div>
+            <div class="form-group">
+                <label asp-for="Email"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-warning"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PhoneNumber"></label>
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-warning"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Password"></label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-warning"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ConfirmPassword"></label>
+                <input asp-for="ConfirmPassword" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-warning"></span>
+            </div>
+            <button type="submit" id="btnRegister" class="btn btn-light">Register</button>
+        </form>
+    </div>
+    <div class="col-md-4"></div>
+</div>
+
+<div class="modal fade" id="twofactorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Two Factor Authentication</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="btnModalClose">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="container-fluid">
+                <span class="text-sm-left font-weight-light">A text message has been sent to your phone number [<span id="spanPhoneNumber" class="font-weight-bold"></span>] containing your code. Please enter the code to verify your identity.</span>
+            </div>
+            <div class="container-fluid">
+                <span class="text-danger font-weight-lighter">Kidding, don't have time for this. Just put anything and click Verify for now.</span>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="form-group">
+                        <label for="VerifyCode" class="col-form-label">Verification Code:</label>
+                        <input class="form-control" id="VerifyCode" value="111111111"></input>
+                        <input type="hidden" id="UserIdentifier" />
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary">Resend Code</button>
+                <button type="button" class="btn btn-secondary" id="btnVerify">Verify</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script type="text/javascript">
+
+$(document).ready(function () {
+
+    $("#btnRegister").click(function () {
+
+        register();
+    })
+
+    $("#btnVerify").click(function () {
+
+        verify();
+    })
+
+    $("#btnModalClose").click(function () {
+
+        reload();
+    })
+
+});
+
+    function verify() {
+        $("#registrationForm").validate();
+
+        if ($("#registrationForm").valid()) {
+
+            var model = {
+                Email: $("#Email").val(),
+                Password: $("#Password").val(),
+                PhoneNumber: $("#PhoneNumber").val()
+            };
+            var code = $("#VerifyCode").val()
+
+            $.ajax({
+                type: 'POST',
+                cache: false,
+                url: '/Registration/Verify',
+                dataType: 'json',
+                data: { user: model, code: code },
+                error: function (result) {
+                    alert("Oops, Something went wrong. Error in connecting to Server.");
+                },
+                success: function (result) {
+                    window.location.href = '@Url.Action("Index","Home")'
+                }
+            });
+        }
+
+    }
+
+    function register() {
+        $("#registrationForm").validate();
+
+        if ($("#registrationForm").valid()) {
+
+            var model = {
+                Email: $("#Email").val(),
+                Password: $("#Password").val(),
+                PhoneNumber: $("#PhoneNumber").val()
+            }
+
+        $.ajax({
+            type: 'POST',
+            cache: false,
+            url: '@Url.Action("Register","Registration")',
+            dataType: 'json',
+            data: model,
+            error: function (result) {
+                alert("Oops, Something went wrong. Error in connecting to Server.");
+            },
+            success: function (result) {
+                if (result.hasError) {
+                    $("#divSummary").text(result.errorMessage);
+                }
+                else {
+                    loadTFAModal(result.email, result.phoneNumber);
+                }
+                }
+            });
+        }
+    }
+
+    function loadTFAModal(email, phone) {
+            $("#UserIdentifier").val(email);
+            $("#spanPhoneNumber").text(phone);
+            $('#twofactorModal').modal("show");
+    }
+
+    function reload() {
+        window.location.href = '@Url.Action("Register","Registration")'
+    }
+
+    </script>
+
+}
