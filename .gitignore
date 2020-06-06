@@ -3,3 +3,7 @@
 ################################################################################
 
 /.vs/ForTheApplication
+/ForTheApplication/bin
+/ForTheApplication/obj
+/ForTheApplication/Properties/PublishProfiles
+/ForTheApplicationTests/obj

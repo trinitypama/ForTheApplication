@@ -22,7 +22,7 @@ namespace LoginApplication.Controllers
                 return View();
             }
 
-            return RedirectToAction("Logout", "Logout");
+            return RedirectToAction("Logout", "Session ");
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
