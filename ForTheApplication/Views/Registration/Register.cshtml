@@ -33,6 +33,55 @@
     <div class="col-md-4"></div>
 </div>
 
+<div>
+    <div id="dropin-container"></div>
+    <button id="submit-button">Purchase</button>
+
+</div>
+<script src="https://js.braintreegateway.com/web/dropin/1.32.1/js/dropin.min.js"></script>
+
+<script>
+    var submitButton = document.querySelector('#submit-button');
+
+    braintree.dropin.create({
+        authorization: 'sandbox_d5ybkww9_vm62shtx6qs9mkb6',
+        container: '#dropin-container',
+        venmo: {
+            allowDesktop: true,
+            allowNewBrowserTab: false
+        },
+        applePay: {
+            displayName: "NFG",
+            PaymentRequest: {
+                total: {
+                    label: 'My Store',
+                    amount: '19.99'
+                },
+                requiredBillingContactFields: ["postalAddress"]
+            }
+        },
+        googlePay: {
+            googlePayVersion: 2,
+            merchantId: 'merchant-id'
+        }
+    }, function (err, dropinInstance) {
+        if (err) {
+            // Handle any errors that might've occurred when creating Drop-in
+            console.error(err);
+            return;
+        }
+        submitButton.addEventListener('click', function () {
+            dropinInstance.requestPaymentMethod(function (err, payload) {
+                if (err) {
+                    // Handle errors in requesting payment method
+                }
+
+                // Send payload.nonce to your server
+            });
+        });
+    });
+</script>
+
 <div class="modal fade" id="twofactorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
